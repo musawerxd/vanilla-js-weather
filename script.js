@@ -39,7 +39,17 @@ cityInput.addEventListener("keydown", (event) => {
 })
 
 searchBtn.addEventListener("click", () => {
-    printWeather()
+    let city = cityInput.value.trim();
+    if (!city) {
+        cityInput.style.borderColor = "red"
+        cityInput.style.boxShadow = "0 0 0 3px rgba(237, 9, 9, 0.2)"
+        setTimeout(() => {
+            cityInput.style.borderColor = ""
+            cityInput.style.boxShadow = ""
+        }, 600);
+        return;
+    }
+    printWeather(city)
 })
 
 
@@ -181,7 +191,9 @@ function updateUi(data) {
 
 
 
+function validateInput() {
 
+}
 
 
 async function printWeather(city = "Multan") {
