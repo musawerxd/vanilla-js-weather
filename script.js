@@ -1,11 +1,12 @@
-
+document.getElementById("theme").innerText = document.body.classList.contains("dark") ? "☀ Light Mode" : "🌙 Dark Mode";
 
 //theme
 
 document.getElementById("theme").addEventListener("click", () => {
     document.body.classList.toggle("dark");
     let isDark = document.body.classList.contains("dark");
-    document.getElementById("theme").innerText = isDark ? "☀ Light Mode" : "🌙 Dark Mode"
+    document.getElementById("theme").innerText = isDark ? "☀ Light Mode" : "🌙 Dark Mode";
+    localStorage.setItem("theme", isDark ? "dark" : "light")
 })
 
 
@@ -40,29 +41,6 @@ cityInput.addEventListener("keydown", (event) => {
 searchBtn.addEventListener("click", () => {
     printWeather()
 })
-
-
-window.addEventListener("DOMContentLoaded", () => {
-    fetchWeatherData("Multan")
-        .then((response) => {
-
-            cityName.innerText = setCityandCountry(response)
-            currentDate.innerText = setDate(response)
-            temparture.innerText = setTemprature(response)
-            weatherDesc.innerText = setWeatherDesc(response)
-            humidity.innerText = setHumidity(response)
-            wind.innerText = setWind(response)
-            feelLike.innerText = setFeelLike(response)
-            console.log(response);
-        })
-        .catch((err) => {
-            console.log("Error: ", err)
-        })
-})
-
-
-
-
 
 
 
@@ -142,35 +120,63 @@ function setDate(data) {
 }
 
 
+// function setIcon(data) {
+
+//     const weather = data.weather[0].main;
+
+//     if (weather === "Clear") {
+//         return "☀️";
+//     }
+
+//     if (weather === "Clouds") {
+//         return "⛅";
+//     }
+
+//     if (weather === "Rain" || weather === "Drizzle") {
+//         return "🌧️";
+//     }
+
+//     if (weather === "Thunderstorm") {
+//         return "⛈️";
+//     }
+
+//     if (weather === "Snow") {
+//         return "❄️";
+//     }
+
+//     if (weather === "Mist" || weather === "Fog" || weather === "Haze") {
+//         return "🌫️";
+//     }
+
+//     return "🌤️"; //default
+// }
+
+const iconMap = {
+    Clear: "☀️",
+    Clouds: "⛅",
+    Rain: "🌧️",
+    Drizzle: "🌧️",
+    Thunderstorm: "⛈️",
+    Snow: "❄️",
+    Mist: "🌫️",
+    Fog: "🌫️",
+    Haze: "🌫️",
+};
+
 function setIcon(data) {
+    return iconMap[data.weather[0].main] || "🌤️";
+}
 
-    const weather = data.weather[0].main;
 
-    if (weather === "Clear") {
-        return "☀️";
-    }
-
-    if (weather === "Clouds") {
-        return "⛅";
-    }
-
-    if (weather === "Rain" || weather === "Drizzle") {
-        return "🌧️";
-    }
-
-    if (weather === "Thunderstorm") {
-        return "⛈️";
-    }
-
-    if (weather === "Snow") {
-        return "❄️";
-    }
-
-    if (weather === "Mist" || weather === "Fog" || weather === "Haze") {
-        return "🌫️";
-    }
-
-    return "🌤️"; // fallback
+function updateUi(data) {
+    cityName.innerText = setCityandCountry(data)
+    currentDate.innerText = setDate(data)
+    temparture.innerText = setTemprature(data)
+    weatherDesc.innerText = setWeatherDesc(data)
+    humidity.innerText = setHumidity(data)
+    wind.innerText = setWind(data)
+    feelLike.innerText = setFeelLike(data)
+    weatherIcon.innerText = setIcon(data)
 }
 
 
@@ -178,9 +184,8 @@ function setIcon(data) {
 
 
 
-
-async function printWeather() {
-    let city = cityInput.value;
+async function printWeather(city = "Multan") {
+    city = cityInput.value.trim() || city;
     if (!city) {
         cityInput.style.borderColor = "red"
         cityInput.style.boxShadow = "0 0 0 3px rgba(237, 9, 9, 0.2)"
@@ -191,25 +196,21 @@ async function printWeather() {
         return;
     }
     cityInput.value = "";
-    fetchWeatherData(city)
-        .then((response) => {
 
-            cityName.innerText = setCityandCountry(response)
-            currentDate.innerText = setDate(response)
-            temparture.innerText = setTemprature(response)
-            weatherDesc.innerText = setWeatherDesc(response)
-            humidity.innerText = setHumidity(response)
-            wind.innerText = setWind(response)
-            feelLike.innerText = setFeelLike(response)
-            weatherIcon.innerText = setIcon(response)
-            console.log(response);
-        })
-        .catch((err) => {
-            console.log("Error: ", err)
-        })
 
+    try {
+        const data = await fetchWeatherData(city);
+        updateUi(data);
+        console.log(data);
+    }
+    catch (err) {
+        console.log("Error: ", err)
+    }
 }
 
 
 
 
+window.addEventListener("DOMContentLoaded", () => {
+    printWeather()
+})
